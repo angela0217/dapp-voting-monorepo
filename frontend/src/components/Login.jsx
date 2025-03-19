@@ -1,34 +1,38 @@
-import React, { useState } from 'react';
-import { Button, Typography } from '@mui/material';
+import React, { useState } from "react";
+import { Button, Typography, Box } from "@mui/material";
 
 export default function Login({ onLogin }) {
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
-  const connectWallet = async () => {
+  const switchAccount = async () => {
+    if (!window.ethereum) {
+      setMessage("⚠ Please install MetaMask.");
+      return;
+    }
     try {
-      if (!window.ethereum) {
-        setError("Metamask not found!");
-        return;
-      }
-      // 请求用户授权
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      if (accounts.length > 0) {
-        onLogin(accounts[0]); // 回调，把地址回传给上层
-      }
-    } catch (e) {
-      setError(e.message);
+      const accounts = await window.ethereum.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }]
+      });
+
+      // Fetch the new selected account
+      const selectedAccounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      onLogin(selectedAccounts[0]);
+      setMessage(`✅ Switched to ${selectedAccounts[0]}`);
+    } catch (error) {
+      console.error("Error switching account:", error);
+      setMessage("❌ Failed to switch account.");
     }
   };
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-      <Typography variant="h5" gutterBottom>
-        Please Connect Your Wallet
-      </Typography>
-      <Button variant="contained" onClick={connectWallet}>
-        Connect Metamask
+    <Box sx={{ maxWidth: 400, margin: "auto", mt: 4, p: 3, boxShadow: 3, borderRadius: 2 }}>
+      <Typography variant="h5" gutterBottom>Login with MetaMask</Typography>
+      <Button variant="contained" onClick={switchAccount} sx={{ mt: 2 }}>
+        Switch Account
       </Button>
-      {error && <Typography color="error">{error}</Typography>}
-    </div>
+      {message && <Typography sx={{ mt: 2, color: "red" }}>{message}</Typography>}
+    </Box>
   );
 }
+

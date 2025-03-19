@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 
 
 // ✅ Load ABI dynamically from compiled Hardhat artifacts
-const CONTRACT_ADDRESS = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"; // Replace with your deployed contract address
+const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Replace with your deployed contract address
 const ABI = [
     {
       "anonymous": false,
@@ -365,9 +365,27 @@ export async function createPoll(title, desc, options, startTime, endTime) {
 
 // 🛠 Fetch all polls
 export async function getAllPolls() {
-  const c = await getContract();
-  return await c.getAllPolls();
+  try {
+    const c = await getContract();
+    const polls = await c.getAllPolls();
+
+    return polls.map((poll, index) => ({
+      pollId: poll.pollId.toNumber(), // Convert BigNumber to number
+      title: poll.title,
+      description: poll.description,
+      creator: poll.creator,
+      options: poll.options,
+      votes: poll.votes.map(v => v.toNumber()), // Convert votes from BigNumber to number
+      active: poll.active,
+      startTime: new Date(poll.startTime.toNumber() * 1000).toLocaleString(), // Convert to readable date
+      endTime: new Date(poll.endTime.toNumber() * 1000).toLocaleString(),
+    }));
+  } catch (error) {
+    console.error("Error fetching polls:", error);
+    return [];
+  }
 }
+
 
 
 // 🛠 Fetch a single poll by ID

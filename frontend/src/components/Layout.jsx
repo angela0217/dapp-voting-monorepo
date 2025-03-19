@@ -1,28 +1,43 @@
-import React from 'react';
-import { AppBar, Toolbar, Typography, Button } from '@mui/material';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Button, AppBar, Toolbar, Typography } from "@mui/material";
 
 export default function Layout({ children, currentAccount, onLogout }) {
+  const navigate = useNavigate(); // 🚀 Hook for navigation
+  const location = useLocation(); // 📍 Get current URL path
+
   return (
     <div>
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            DApp Voting
+            Decentralized Voting
           </Typography>
-          {currentAccount ? (
+
+          {currentAccount && (
             <>
-              <Typography>{currentAccount.slice(0,6)}...{currentAccount.slice(-4)}</Typography>
-              <Button color="inherit" onClick={onLogout}>Logout</Button>
+              <Button color="inherit" onClick={() => navigate("/")}>
+                Home
+              </Button>
+
+              {/* ✅ Only show "Go Back" if NOT on Home Page ("/") */}
+              {location.pathname !== "/" && (
+                <Button color="inherit" onClick={() => navigate(-1)}>
+                  🔙 Go Back
+                </Button>
+              )}
+
+              <Button color="inherit" onClick={onLogout}>
+                Logout
+              </Button>
             </>
-          ) : (
-            <Button color="inherit" component={Link} to="/login">Login</Button>
           )}
         </Toolbar>
       </AppBar>
-      <div style={{ margin: '20px' }}>
-        {children}
-      </div>
+
+      <div style={{ padding: 20 }}>{children}</div>
     </div>
   );
 }
+
+
