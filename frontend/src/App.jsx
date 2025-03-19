@@ -6,7 +6,7 @@ import CreatePoll from "./components/CreatePoll";
 import PollList from "./components/PollList";
 import PollDetails from "./components/PollDetails";
 import MyPolls from "./components/MyPolls";
-import Home from "./components/Home"; // ✅ Import Home Page
+import Home from "./components/Home";
 
 export default function App() {
   const [currentAccount, setCurrentAccount] = useState(localStorage.getItem("currentAccount") || "");
@@ -52,15 +52,17 @@ export default function App() {
     <BrowserRouter>
       <Layout currentAccount={currentAccount} onLogout={handleLogout}>
         <Routes>
-          <Route path="/" element={<Home />} /> {/* Main Page */}
+          {/* ✅ Redirect to login if not logged in */}
+          <Route path="/" element={currentAccount ? <Home /> : <Navigate to="/login" />} />
           <Route path="/login" element={currentAccount ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />
-          <Route path="/polls" element={<PollList />} />
-          <Route path="/polls/:id" element={<PollDetails currentAccount={currentAccount} />} />
-          <Route path="/create" element={<CreatePoll currentAccount={currentAccount} />} />
-          <Route path="/mypolls" element={<MyPolls currentAccount={currentAccount} />} />
+          <Route path="/polls" element={currentAccount ? <PollList /> : <Navigate to="/login" />} />
+          <Route path="/polls/:id" element={currentAccount ? <PollDetails currentAccount={currentAccount} /> : <Navigate to="/login" />} />
+          <Route path="/create" element={currentAccount ? <CreatePoll currentAccount={currentAccount} /> : <Navigate to="/login" />} />
+          <Route path="/mypolls" element={currentAccount ? <MyPolls currentAccount={currentAccount} /> : <Navigate to="/login" />} />
         </Routes>
       </Layout>
     </BrowserRouter>
   );
 }
+
 
